@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { InterviewListData } from "@/types/interviewTypes";
 import {
   BarChart2Icon,
   CheckCircleIcon,
@@ -9,12 +10,20 @@ import {
   TrendingUpIcon,
 } from "lucide-react";
 
-export function InterviewStats() {
+interface InterviewStatsProp {
+  interviewList: InterviewListData | null;
+}
+
+export const InterviewStats: React.FC<InterviewStatsProp> = ({
+  interviewList,
+}) => {
   const totalInterviews = 50;
   const completedInterviews = 35;
   const upcomingInterviews = 15;
   const averageScore = 8.7;
   const completionRate = (completedInterviews / totalInterviews) * 100;
+
+  console.log("InterviewListData in InterviewStats: ", interviewList);
 
   return (
     <Card className="w-full h-fit max-w-md bg-gray-900 border-gray-700 shadow-lg">
@@ -60,7 +69,7 @@ export function InterviewStats() {
       </CardContent>
     </Card>
   );
-}
+};
 
 interface StatItemProps {
   label: string;

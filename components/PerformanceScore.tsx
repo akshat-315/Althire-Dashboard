@@ -2,76 +2,72 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  DimensionalScore,
+  DimensionScore,
+  Interview,
+  InterviewListData,
+  InterviewStatsProp,
+  PerformanceScoreData,
+} from "@/types/interviewTypes";
+import { useEffect, useState } from "react";
 
-interface Interview {
-  id: string;
-  problemSolving: number;
-  coding: number;
-  verifying: number;
-  communication: number;
-}
+export const PerformanceScore: React.FC<InterviewStatsProp> = ({
+  interviewList,
+}) => {
+  //variable declarations
+  const [averageScores, setAverageScores] =
+    useState<PerformanceScoreData | null>(null);
 
-const interviews: Interview[] = [
-  {
-    id: "INT-001",
-    problemSolving: 8,
-    coding: 7,
-    verifying: 9,
-    communication: 8,
-  },
-  {
-    id: "INT-002",
-    problemSolving: 9,
-    coding: 8,
-    verifying: 7,
-    communication: 9,
-  },
-  {
-    id: "INT-003",
-    problemSolving: 7,
-    coding: 9,
-    verifying: 8,
-    communication: 7,
-  },
-  {
-    id: "INT-004",
-    problemSolving: 8,
-    coding: 8,
-    verifying: 8,
-    communication: 8,
-  },
-];
+  //calculates the average of all the dimension
+  async function calculateDimensionData(interviewList: InterviewListData) {
+    const dimensionStats: DimensionScore = {};
 
-function calculateAverageScores(interviews: Interview[]) {
-  const totalScores = interviews.reduce(
-    (acc, interview) => {
-      return {
-        problemSolving: acc.problemSolving + interview.problemSolving,
-        coding: acc.coding + interview.coding,
-        verifying: acc.verifying + interview.verifying,
-        communication: acc.communication + interview.communication,
+    interviewList?.interviews_list.forEach((interview: Interview) => {
+      if (
+        interview.status === "processed" &&
+        interview.finished_interview_data.length > 0
+      ) {
+        const dimensionalScores =
+          interview.finished_interview_data[0].evaluation?.dimensional_scores ||
+          [];
+
+        dimensionalScores.forEach((scoreObj: DimensionalScore) => {
+          const dimension = scoreObj.dimension;
+          const score = scoreObj.score;
+
+          if (!dimensionStats[dimension]) {
+            dimensionStats[dimension] = { total: 0, count: 0 };
+          }
+
+          dimensionStats[dimension].total += score;
+          dimensionStats[dimension].count += 1;
+        });
+      }
+    });
+
+    const dimensionAverages: { [key: string]: number } = {};
+    Object.keys(dimensionStats).forEach((dimension) => {
+      dimensionAverages[dimension] =
+        dimensionStats[dimension].total / dimensionStats[dimension].count;
+    });
+
+    console.log("Dimension Averages: ", dimensionAverages);
+    return dimensionAverages;
+  }
+
+  //hooks
+  useEffect(() => {
+    if (interviewList) {
+      const fetchData = async () => {
+        const dimensionData = await calculateDimensionData(interviewList);
+        setAverageScores(dimensionData);
+        console.log(dimensionData);
       };
-    },
-    { problemSolving: 0, coding: 0, verifying: 0, communication: 0 }
-  );
 
-  const count = interviews.length;
-  return {
-    problemSolving: totalScores.problemSolving / count,
-    coding: totalScores.coding / count,
-    verifying: totalScores.verifying / count,
-    communication: totalScores.communication / count,
-  };
-}
-
-export function PerformanceScore() {
-  const averageScores = calculateAverageScores(interviews);
-  const overallScore =
-    (averageScores.problemSolving +
-      averageScores.coding +
-      averageScores.verifying +
-      averageScores.communication) /
-    4;
+      fetchData();
+    }
+  }, [interviewList]);
 
   return (
     <Card className="w-full max-w-md bg-gray-900 border-gray-700 shadow-lg h-fit">
@@ -81,28 +77,28 @@ export function PerformanceScore() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-center mb-6">
+        {/* <div className="text-center mb-6">
           <span className="text-5xl font-bold text-primary text-gray-700">
-            {overallScore.toFixed(1)}
+            {2}
           </span>
-          <span className="text-xl text-gray-400">/10</span>
-        </div>
+          <span className="text-xl text-gray-400">/10</span> */}
+        {/* </div> */}
         <div className="space-y-4">
-          <ScoreItem
-            label="Problem Solving"
-            score={averageScores.problemSolving}
-          />
-          <ScoreItem label="Coding" score={averageScores.coding} />
-          <ScoreItem label="Verifying" score={averageScores.verifying} />
-          <ScoreItem
-            label="Communication"
-            score={averageScores.communication}
-          />
+          {averageScores &&
+            Object.keys(averageScores).map((averageScore) => {
+              return (
+                <ScoreItem
+                  key={averageScore}
+                  label={averageScore}
+                  score={averageScores[averageScore]}
+                />
+              );
+            })}
         </div>
       </CardContent>
     </Card>
   );
-}
+};
 
 interface ScoreItemProps {
   label: string;
@@ -118,7 +114,7 @@ function ScoreItem({ label, score }: ScoreItemProps) {
           {score.toFixed(1)}/10
         </span>
       </div>
-      <Progress value={score * 10} className="h-2 bg-gray-700" />
+      <Progress value={score * 10} className="h-2 bg-gray-400" />
     </div>
   );
 }

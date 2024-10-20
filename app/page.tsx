@@ -1,11 +1,45 @@
+"use client";
 import { DimensionalScores } from "@/components/DimensionalScores";
 import { InterviewStats } from "@/components/InterviewStats";
 import { PendingInterviews } from "@/components/PendingInterviews";
 import { PerformanceScore } from "@/components/PerformanceScore";
 import { TemporalPerformanceChart } from "@/components/TemporalPerformanceChart";
+import { ApiResponse, InterviewListData } from "@/types/interviewTypes";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export default function Home() {
+  const [interviewList, setInterviewList] = useState<InterviewListData | null>(
+    null
+  );
+  const fetchInterviewData = async () => {
+    try {
+      let response = await fetch(
+        "https://api.althire.ai/assignment/fullstack01"
+      );
+      if (!response.ok) {
+        toast.error("Could not load Interview data");
+      }
+      const jsonData: ApiResponse = await response.json();
+      return jsonData.data;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      const interviewData = await fetchInterviewData();
+      if (interviewData) {
+        console.log("Setting data");
+        setInterviewList(interviewData);
+      }
+    };
+
+    loadData();
+  }, []);
+
   return (
     <div className="p-6 text-white mx-20">
       {/* Dashboard Description */}
@@ -22,7 +56,7 @@ export default function Home() {
       <div className="grid grid-cols-2 lg:grid-cols-2 gap-8 justify-between">
         {/* Interview Stats on Left */}
         <div className="flex flex-col w-full max-w-lg">
-          <InterviewStats />
+          <InterviewStats interviewList={interviewList} />
           <p className="mt-4 text-gray-300 w-full">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
             imperdiet nulla et commodo faucibus.
@@ -32,7 +66,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Performance Score on Left */}
           <div>
-            <PerformanceScore />
+            <PerformanceScore interviewList={interviewList} />
           </div>
 
           {/* Performance Score Description on Right */}
