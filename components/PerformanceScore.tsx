@@ -74,7 +74,7 @@ export function PerformanceScore() {
     4;
 
   return (
-    <Card className="w-full max-w-md bg-gray-900 border-gray-700 shadow-lg">
+    <Card className="w-full max-w-md bg-gray-900 border-gray-700 shadow-lg h-fit">
       <CardHeader className="pb-2">
         <CardTitle className="text-2xl font-bold text-white">
           Performance Score
