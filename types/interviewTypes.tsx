@@ -75,3 +75,9 @@ export interface StatsInterface {
   pending: number;
   avgScore: number;
 }
+
+export interface PendingInterviewInterface {
+  interviewId: string;
+  interviewerName: string;
+  time: string;
+}

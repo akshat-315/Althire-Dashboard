@@ -76,8 +76,8 @@ export default function Home() {
             interview outcomes.
           </p>
         </div>
-        <div className="flex justify-end ">
-          <PendingInterviews />
+        <div className="flex justify-end h-fit">
+          <PendingInterviews interviewList={interviewList} />
         </div>
       </div>
 

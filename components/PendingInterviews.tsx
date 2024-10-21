@@ -3,6 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ClockIcon, UserIcon, LinkIcon } from "lucide-react";
+import {
+  InterviewInterface,
+  InterviewListData,
+  InterviewStatsProp,
+  PendingInterviewInterface,
+} from "@/types/interviewTypes";
+import { useEffect, useState } from "react";
 
 interface PendingInterview {
   id: string;
@@ -32,7 +39,49 @@ const pendingInterviews: PendingInterview[] = [
   },
 ];
 
-export function PendingInterviews() {
+export const PendingInterviews: React.FC<InterviewStatsProp> = ({
+  interviewList,
+}) => {
+  const [pendingInterviews, setPendingInterviews] = useState<
+    PendingInterviewInterface[]
+  >([]);
+
+  function convertEpochTime(epochTime: number) {
+    const date = new Date(epochTime * 1000);
+
+    return date.toLocaleString("en-IN", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+    });
+  }
+
+  async function getPendingInterviews(interviewList: InterviewListData) {
+    const pending = interviewList.interviews_list
+      .filter((interview: InterviewInterface) => interview.status === "pending")
+      .map((interview: InterviewInterface) => ({
+        interviewId: interview.id,
+        interviewerName: interview.interviewer_name,
+        time: convertEpochTime(interview.interview_created_at),
+      }));
+
+    return pending;
+  }
+
+  useEffect(() => {
+    if (interviewList) {
+      const fetchData = async () => {
+        const data = await getPendingInterviews(interviewList);
+        setPendingInterviews(data);
+      };
+      fetchData();
+    }
+  }, [interviewList]);
+
   return (
     <Card className="w-full max-w-md bg-gray-900 border-gray-700 shadow-lg">
       <CardHeader className="pb-2">
@@ -41,24 +90,24 @@ export function PendingInterviews() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4 h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
-          {pendingInterviews.map((interview) => (
+        <div className="space-y-4 h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
+          {pendingInterviews.map((interview: PendingInterviewInterface) => (
             <div
-              key={interview.id}
+              key={interview.interviewId}
               className="bg-gray-800 rounded-lg p-4 space-y-2"
             >
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-300">
-                  ID: {interview.id}
+                  ID: {interview.interviewId}
                 </span>
                 <span className="text-sm font-medium text-yellow-400 flex items-center">
                   <ClockIcon className="w-4 h-4 mr-1" />
-                  {new Date(interview.expiryTime).toLocaleString()}
+                  {interview.time}
                 </span>
               </div>
               <div className="flex items-center text-gray-300">
                 <UserIcon className="w-4 h-4 mr-2" />
-                <span className="text-sm">{interview.interviewer}</span>
+                <span className="text-sm">{interview.interviewerName}</span>
               </div>
               <div className="flex justify-between items-center mt-2">
                 <Button
@@ -83,4 +132,4 @@ export function PendingInterviews() {
       </CardContent>
     </Card>
   );
-}
+};

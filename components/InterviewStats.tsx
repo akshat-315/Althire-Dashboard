@@ -21,9 +21,7 @@ type CompletionRate = number;
 export const InterviewStats: React.FC<InterviewStatsProp> = ({
   interviewList,
 }) => {
-  const [completionRate, setCompletionRate] = useState<CompletionRateType | 0>(
-    0
-  );
+  const [completionRate, setCompletionRate] = useState<CompletionRate | 0>(0);
   const [interviewStats, setInterviewStats] = useState<StatsInterface | null>(
     null
   );
