@@ -23,7 +23,7 @@ export interface FinishedInterviewData {
   question: string;
 }
 
-export interface Interview {
+export interface InterviewInterface {
   hours_to_expire: number;
   id: string;
   interview_created_at: number;
@@ -47,7 +47,7 @@ export interface Interview {
 
 export interface InterviewListData {
   campaignId: string;
-  interviews_list: Interview[];
+  interviews_list: InterviewInterface[];
 }
 
 export interface DimensionStat {
@@ -59,7 +59,7 @@ export interface DimensionScore {
   [key: string]: DimensionStat;
 }
 
-export interface PerformanceScoreData {
+export interface PerformanceScoreInterface {
   [key: string]: number;
 }
 
@@ -67,4 +67,11 @@ export interface ApiResponse {
   code: number;
   message: string;
   data: InterviewListData;
+}
+
+export interface StatsInterface {
+  totalInterviews: number;
+  processed: number;
+  pending: number;
+  avgScore: number;
 }

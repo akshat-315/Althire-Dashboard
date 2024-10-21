@@ -91,7 +91,7 @@ export function TemporalPerformanceChart() {
   );
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-gray-900 text-white">
+    <Card className="w-full max-w-6xl mx-auto bg-gray-900 text-white">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center mb-4">
           Temporal Performance Analysis

@@ -2,28 +2,68 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { InterviewListData } from "@/types/interviewTypes";
+import {
+  InterviewInterface,
+  InterviewListData,
+  InterviewStatsProp,
+  StatsInterface,
+} from "@/types/interviewTypes";
 import {
   BarChart2Icon,
   CheckCircleIcon,
   ClockIcon,
   TrendingUpIcon,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
-interface InterviewStatsProp {
-  interviewList: InterviewListData | null;
-}
+type CompletionRate = number;
 
 export const InterviewStats: React.FC<InterviewStatsProp> = ({
   interviewList,
 }) => {
-  const totalInterviews = 50;
-  const completedInterviews = 35;
-  const upcomingInterviews = 15;
-  const averageScore = 8.7;
-  const completionRate = (completedInterviews / totalInterviews) * 100;
+  const [completionRate, setCompletionRate] = useState<CompletionRateType | 0>(
+    0
+  );
+  const [interviewStats, setInterviewStats] = useState<StatsInterface | null>(
+    null
+  );
 
   console.log("InterviewListData in InterviewStats: ", interviewList);
+
+  async function calculateInterviewStats(interviewList: InterviewListData) {
+    const stats: StatsInterface = {
+      totalInterviews: 0,
+      processed: 0,
+      pending: 0,
+      avgScore: 0,
+    };
+    stats.totalInterviews = interviewList.interviews_list.length;
+    interviewList.interviews_list.forEach((interview: InterviewInterface) => {
+      if (interview.finished_interview_data.length > 0) {
+        stats.avgScore += interview.finished_interview_data[0].evaluation.score;
+      }
+      interview.status == "processed" ? stats.processed++ : stats.pending++;
+    });
+    return stats;
+  }
+
+  useEffect(() => {
+    if (interviewList) {
+      const fetchData = async () => {
+        const data = await calculateInterviewStats(interviewList);
+        setInterviewStats(data);
+      };
+      fetchData();
+    }
+  }, [interviewList]);
+
+  useEffect(() => {
+    console.log("InterviewStats: ", interviewStats);
+    const totalInterviews = interviewStats?.totalInterviews ?? 0;
+    const processedInterviews = interviewStats?.processed ?? 0;
+    const rate: CompletionRate = (processedInterviews / totalInterviews) * 100;
+    setCompletionRate(rate);
+  }, [interviewStats]);
 
   return (
     <Card className="w-full h-fit max-w-md bg-gray-900 border-gray-700 shadow-lg">
@@ -36,22 +76,22 @@ export const InterviewStats: React.FC<InterviewStatsProp> = ({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <StatItem
             label="Total Interviews"
-            value={totalInterviews}
+            value={interviewStats?.totalInterviews ?? 0}
             icon={<BarChart2Icon className="w-5 h-5 text-blue-400" />}
           />
           <StatItem
             label="Completed"
-            value={completedInterviews}
+            value={interviewStats?.processed ?? 0}
             icon={<CheckCircleIcon className="w-5 h-5 text-green-400" />}
           />
           <StatItem
             label="Upcoming"
-            value={upcomingInterviews}
+            value={interviewStats?.pending ?? 0}
             icon={<ClockIcon className="w-5 h-5 text-yellow-400" />}
           />
           <StatItem
             label="Average Score"
-            value={`${averageScore.toFixed(1)}/10`}
+            value={interviewStats?.avgScore ?? 0}
             icon={<TrendingUpIcon className="w-5 h-5 text-purple-400" />}
           />
         </div>

@@ -53,7 +53,7 @@ export default function Home() {
         </p>
       </div>
       {/* Grid Layout for Top Section */}
-      <div className="grid grid-cols-2 lg:grid-cols-2 gap-8 justify-between">
+      <div className="grid grid-cols-3 gap-8 justify-between">
         {/* Interview Stats on Left */}
         <div className="flex flex-col w-full max-w-lg">
           <InterviewStats interviewList={interviewList} />
@@ -63,41 +63,30 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Performance Score on Left */}
-          <div>
-            <PerformanceScore interviewList={interviewList} />
-          </div>
+        <div className="grid grid-cols-1 gap-8 mb-8">
+          <PerformanceScore interviewList={interviewList} />
 
-          {/* Performance Score Description on Right */}
-          <div>
-            <h3 className="text-xl font-bold mb-4">
-              Performance Score Breakdown
-            </h3>
-            <p className="text-gray-300">
-              Your performance score represents an aggregate score across key
-              interview dimensions such as problem-solving, coding, verifying,
-              and communication. By improving in these areas, you can achieve
-              higher interview outcomes.
-            </p>
-          </div>
+          <h3 className="text-xl font-bold mb-4">
+            Performance Score Breakdown
+          </h3>
+          <p className="text-gray-300">
+            Your performance score represents an aggregate score across key
+            interview dimensions such as problem-solving, coding, verifying, and
+            communication. By improving in these areas, you can achieve higher
+            interview outcomes.
+          </p>
         </div>
-
-        {/* Pending Interviews on Right */}
+        <div className="flex justify-end ">
+          <PendingInterviews />
+        </div>
       </div>
 
-      {/* Grid Layout for Performance Score and Description */}
-      <div className="flex justify-end">
-        <PendingInterviews />
-      </div>
-
-      {/* Dimensional Scores and Temporal Performance Chart */}
-      <div className="grid grid-cols-1 gap-8 my-20">
-        {/* Dimensional Scores on Left */}
-        <div className="grid grid-cols-1">
-          {/* Dimensional Scores */}
-          <div className="flex flex-col w-full max-w-full items-center">
+      <div className="grid grid-cols-1 gap-20 mt-20 mb-16">
+        <div className="grid grid-cols-3 gap-11">
+          <div className="flex flex-col col-span-2 w-full max-w-full items-center">
             <DimensionalScores />
+          </div>
+          <div>
             <p className="mt-4 text-gray-300">
               The Dimensional Score Card shows your performance across specific
               dimensions for each interview. These include problem-solving,
@@ -106,14 +95,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Temporal Performance Chart on Right */}
-        <div className="mt-20">
-          {/* Dimensional Scores */}
-          <div className="grid grid-cols-2 w-full max-w-full items-center">
+        <div className="grid grid-cols-3 ">
+          <div>
             <p className="mt-4 text-gray-300">
               The Temporal Performance Analysis tracks your scores over time,
               helping you visualize improvements or areas that need more focus.
             </p>
+          </div>
+          <div className="flex flex-col col-span-2 w-full max-w-full items-center">
             <TemporalPerformanceChart />
           </div>
         </div>

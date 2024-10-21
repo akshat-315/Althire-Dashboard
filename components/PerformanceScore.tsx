@@ -5,10 +5,10 @@ import { Progress } from "@/components/ui/progress";
 import {
   DimensionalScore,
   DimensionScore,
-  Interview,
+  InterviewInterface,
   InterviewListData,
   InterviewStatsProp,
-  PerformanceScoreData,
+  PerformanceScoreInterface,
 } from "@/types/interviewTypes";
 import { useEffect, useState } from "react";
 
@@ -17,13 +17,13 @@ export const PerformanceScore: React.FC<InterviewStatsProp> = ({
 }) => {
   //variable declarations
   const [averageScores, setAverageScores] =
-    useState<PerformanceScoreData | null>(null);
+    useState<PerformanceScoreInterface | null>(null);
 
   //calculates the average of all the dimension
   async function calculateDimensionData(interviewList: InterviewListData) {
     const dimensionStats: DimensionScore = {};
 
-    interviewList?.interviews_list.forEach((interview: Interview) => {
+    interviewList?.interviews_list.forEach((interview: InterviewInterface) => {
       if (
         interview.status === "processed" &&
         interview.finished_interview_data.length > 0
@@ -60,9 +60,9 @@ export const PerformanceScore: React.FC<InterviewStatsProp> = ({
   useEffect(() => {
     if (interviewList) {
       const fetchData = async () => {
-        const dimensionData = await calculateDimensionData(interviewList);
-        setAverageScores(dimensionData);
-        console.log(dimensionData);
+        const data = await calculateDimensionData(interviewList);
+        setAverageScores(data);
+        console.log(data);
       };
 
       fetchData();
@@ -77,13 +77,7 @@ export const PerformanceScore: React.FC<InterviewStatsProp> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* <div className="text-center mb-6">
-          <span className="text-5xl font-bold text-primary text-gray-700">
-            {2}
-          </span>
-          <span className="text-xl text-gray-400">/10</span> */}
-        {/* </div> */}
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[180px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
           {averageScores &&
             Object.keys(averageScores).map((averageScore) => {
               return (

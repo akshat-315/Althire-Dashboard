@@ -41,7 +41,7 @@ export function PendingInterviews() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-4 h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
           {pendingInterviews.map((interview) => (
             <div
               key={interview.id}
