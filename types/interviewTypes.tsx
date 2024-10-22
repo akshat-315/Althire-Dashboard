@@ -81,3 +81,10 @@ export interface PendingInterviewInterface {
   interviewerName: string;
   time: string;
 }
+
+export interface DimensionalScoreInterface {
+  id: string;
+  dimensions: {
+    [key: string]: number;
+  };
+}

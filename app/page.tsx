@@ -84,7 +84,7 @@ export default function Home() {
       <div className="grid grid-cols-1 gap-20 mt-20 mb-16">
         <div className="grid grid-cols-3 gap-11">
           <div className="flex flex-col col-span-2 w-full max-w-full items-center">
-            <DimensionalScores />
+            <DimensionalScores interviewList={interviewList} />
           </div>
           <div>
             <p className="mt-4 text-gray-300">

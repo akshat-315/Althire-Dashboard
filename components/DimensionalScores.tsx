@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  DimensionalScoreInterface,
+  InterviewInterface,
+  InterviewListData,
+  InterviewStatsProp,
+} from "@/types/interviewTypes";
 
 // Sample data for multiple interviews (extended to 15)
 const interviewData = [
@@ -149,10 +155,15 @@ const colorScheme = [
   "rgba(255, 159, 64, 0.8)",
 ];
 
-export function DimensionalScores() {
+export const DimensionalScores: React.FC<InterviewStatsProp> = ({
+  interviewList,
+}) => {
+  const [dimensionalData, setDimensionalData] = useState<
+    DimensionalScoreInterface[]
+  >([]);
   const [currentPage, setCurrentPage] = useState(0);
   const interviewsPerPage = 3;
-  const totalPages = Math.ceil(interviewData.length / interviewsPerPage);
+  const totalPages = Math.ceil(dimensionalData.length / interviewsPerPage);
 
   const formatData = (interview: any) => {
     return [
@@ -163,7 +174,41 @@ export function DimensionalScores() {
     ];
   };
 
-  const paginatedInterviews = interviewData.slice(
+  function getDimensionalData(interviewList: InterviewListData) {
+    const processedInterviews = interviewList.interviews_list
+      .filter(
+        (interview: InterviewInterface) => interview.status === "processed"
+      )
+      .map((interview: InterviewInterface) => {
+        const dimensionalScores =
+          interview.finished_interview_data[0].evaluation.dimensional_scores;
+
+        const dimensions: { [key: string]: number } = {};
+
+        dimensionalScores.forEach((ds) => {
+          dimensions[ds.dimension] = ds.score || 0;
+        });
+
+        const scoreObj: DimensionalScoreInterface = {
+          id: interview.id,
+          dimensions: dimensions,
+        };
+
+        return scoreObj;
+      });
+
+    setDimensionalData(processedInterviews);
+  }
+
+  useEffect(() => {
+    if (interviewList) {
+      getDimensionalData(interviewList);
+    }
+  }, [interviewList]);
+
+  console.log("Dimensional data: ", dimensionalData);
+
+  const paginatedInterviews = dimensionalData.slice(
     currentPage * interviewsPerPage,
     (currentPage + 1) * interviewsPerPage
   );
@@ -179,10 +224,10 @@ export function DimensionalScores() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {paginatedInterviews.map((interview, index) => (
             <div key={interview.id} className="flex flex-col items-center">
-              <h3 className="text-lg font-semibold mb-2">{interview.name}</h3>
+              <h3 className="text-lg font-semibold mb-2">{interview.id}</h3>
               <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={formatData(interview)}>
+                  <RadarChart data={formatData(dimensionalData)}>
                     <PolarGrid stroke="rgba(255,255,255,0.3)" />
                     <PolarAngleAxis
                       dataKey="dimension"
@@ -194,7 +239,7 @@ export function DimensionalScores() {
                       tick={{ fill: "white", fontSize: 12 }}
                     />
                     <Radar
-                      name={interview.name}
+                      name={interview.id}
                       dataKey="score"
                       stroke={colorScheme[index % colorScheme.length]}
                       fill={colorScheme[index % colorScheme.length]}
@@ -204,19 +249,24 @@ export function DimensionalScores() {
                 </ResponsiveContainer>
               </div>
               <div className="flex flex-wrap justify-center gap-2 mt-4">
-                {dimensions.map((dimension, i) => (
-                  <Badge
-                    key={dimension}
-                    variant="outline"
-                    className="text-xs"
-                    style={{
-                      borderColor: colorScheme[i],
-                      color: colorScheme[i],
-                    }}
-                  >
-                    {dimension}: {formatData(interview)[i].score}
-                  </Badge>
-                ))}
+                {dimensionalData.map(
+                  (dimScoreObj: DimensionalScoreInterface, i) =>
+                    Object.keys(dimScoreObj.dimensions).map(
+                      (dimensionKey, j) => (
+                        <Badge
+                          key={`${dimScoreObj.id}-${dimensionKey}`}
+                          variant="outline"
+                          className="text-xs"
+                          style={{
+                            borderColor: colorScheme[j % colorScheme.length],
+                            color: colorScheme[j % colorScheme.length],
+                          }}
+                        >
+                          {dimensionKey}: {dimScoreObj.dimensions[dimensionKey]}
+                        </Badge>
+                      )
+                    )
+                )}
               </div>
             </div>
           ))}
@@ -247,4 +297,4 @@ export function DimensionalScores() {
       </CardContent>
     </Card>
   );
-}
+};
