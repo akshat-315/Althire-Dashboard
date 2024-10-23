@@ -228,9 +228,9 @@ export const DimensionalScores: React.FC<InterviewStatsProp> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 ">
           {paginatedInterviews.map((interview, index) => (
-            <div key={interview.id} className="flex flex-col items-center">
+            <div key={interview.id} className="flex flex-col items-center px-2">
               <h3 className="text-lg font-semibold mb-2">{interview.id}</h3>
               <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">

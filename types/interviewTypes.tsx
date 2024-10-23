@@ -88,3 +88,11 @@ export interface DimensionalScoreInterface {
     [key: string]: number;
   };
 }
+
+export interface TemporalPerformanceInterface {
+  id: string;
+  interview_start_at: number;
+  dimensions: {
+    [key: string]: number;
+  };
+}

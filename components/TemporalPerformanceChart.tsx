@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
@@ -17,78 +17,91 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import {
+  DimensionalScoreInterface,
+  InterviewInterface,
+  InterviewListData,
+  InterviewStatsProp,
+  TemporalPerformanceInterface,
+} from "@/types/interviewTypes";
 
-// Sample data for interviews with start dates and dimensional scores
-const interviewData = [
-  {
-    id: 1,
-    interview_start_at: "2023-01-15",
-    problemSolving: 3,
-    coding: 4,
-    verifying: 3,
-    communication: 4,
-  },
-  {
-    id: 2,
-    interview_start_at: "2023-02-01",
-    problemSolving: 4,
-    coding: 3,
-    verifying: 4,
-    communication: 3,
-  },
-  {
-    id: 3,
-    interview_start_at: "2023-02-15",
-    problemSolving: 3,
-    coding: 5,
-    verifying: 4,
-    communication: 4,
-  },
-  {
-    id: 4,
-    interview_start_at: "2023-03-01",
-    problemSolving: 5,
-    coding: 4,
-    verifying: 3,
-    communication: 5,
-  },
-  {
-    id: 5,
-    interview_start_at: "2023-03-15",
-    problemSolving: 4,
-    coding: 4,
-    verifying: 5,
-    communication: 4,
-  },
-  {
-    id: 6,
-    interview_start_at: "2023-04-01",
-    problemSolving: 5,
-    coding: 5,
-    verifying: 4,
-    communication: 5,
-  },
-];
+export const TemporalPerformanceChart: React.FC<InterviewStatsProp> = ({
+  interviewList,
+}) => {
+  const [temporalData, setTemporalData] = useState<
+    TemporalPerformanceInterface[]
+  >([]);
+  const [dynamicDimensions, setDynamicDimensions] = useState<string[]>([]);
 
-const dimensions = ["problemSolving", "coding", "verifying", "communication"];
-const dimensionColors = {
-  problemSolving: "hsl(var(--chart-1))",
-  coding: "hsl(var(--chart-2))",
-  verifying: "hsl(var(--chart-3))",
-  communication: "hsl(var(--chart-4))",
-};
+  // Function to process interview data dynamically and extract unique dimensions
+  function setTemporalPerformanceData(interviewList: InterviewListData) {
+    const processedInterviews = interviewList.interviews_list
+      .filter(
+        (interview: InterviewInterface) => interview.status === "processed"
+      )
+      .map((interview: InterviewInterface) => {
+        const dimensionalScores =
+          interview.finished_interview_data[0].evaluation.dimensional_scores;
 
-export function TemporalPerformanceChart() {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const dimensions: { [key: string]: number } = {};
+
+        dimensionalScores.forEach((ds) => {
+          dimensions[ds.dimension] = ds.score || 0;
+        });
+
+        return {
+          id: interview.id,
+          interview_start_at: interview.interview_start_at,
+          dimensions: dimensions,
+        };
+      });
+
+    // Extract unique dimensions from the processed interviews
+    const uniqueDimensions = Array.from(
+      new Set(
+        processedInterviews.flatMap((interview) =>
+          Object.keys(interview.dimensions)
+        )
+      )
+    );
+
+    setTemporalData(processedInterviews);
+    setDynamicDimensions(uniqueDimensions);
+  }
+
+  useEffect(() => {
+    if (interviewList) {
+      setTemporalPerformanceData(interviewList);
+    }
+  }, [interviewList]);
+
+  function convertEpochTime(epochTime: number) {
+    const date = new Date(epochTime * 1000);
+    return date.toLocaleString("en-IN", { month: "short", day: "numeric" });
+  }
+
+  const sortedData = [...temporalData]
+    .map((interview) => {
+      const formattedInterview = { ...interview, ...interview.dimensions };
+      return formattedInterview;
+    })
+    .sort(
+      (a, b) =>
+        new Date(convertEpochTime(a.interview_start_at)).getTime() -
+        new Date(b.interview_start_at).getTime()
+    );
+
+  // Define colors dynamically for the chart, fallback to default if not enough colors
+  const dimensionColors: { [key: string]: string } = {
+    problemSolving: "hsl(var(--chart-1))",
+    coding: "hsl(var(--chart-2))",
+    verifying: "hsl(var(--chart-3))",
+    communication: "hsl(var(--chart-4))",
+    ...dynamicDimensions.reduce((acc, dimension, index) => {
+      acc[dimension] = `hsl(var(--chart-${index + 1}))`;
+      return acc;
+    }, {} as { [key: string]: string }),
   };
-
-  const sortedData = [...interviewData].sort(
-    (a, b) =>
-      new Date(a.interview_start_at).getTime() -
-      new Date(b.interview_start_at).getTime()
-  );
 
   return (
     <Card className="w-full max-w-6xl mx-auto bg-gray-900 text-white">
@@ -99,24 +112,13 @@ export function TemporalPerformanceChart() {
       </CardHeader>
       <CardContent>
         <ChartContainer
-          config={{
-            problemSolving: {
-              label: "Problem Solving",
-              color: dimensionColors.problemSolving,
-            },
-            coding: {
-              label: "Coding",
-              color: dimensionColors.coding,
-            },
-            verifying: {
-              label: "Verifying",
-              color: dimensionColors.verifying,
-            },
-            communication: {
-              label: "Communication",
-              color: dimensionColors.communication,
-            },
-          }}
+          config={dynamicDimensions.reduce((acc, dimension) => {
+            acc[dimension] = {
+              label: dimension,
+              color: dimensionColors[dimension] || "hsl(var(--chart-default))",
+            };
+            return acc;
+          }, {} as { [key: string]: { label: string; color: string } })}
           className="h-[400px]"
         >
           <ResponsiveContainer width="100%" height="100%">
@@ -130,13 +132,13 @@ export function TemporalPerformanceChart() {
               />
               <XAxis
                 dataKey="interview_start_at"
-                tickFormatter={formatDate}
+                tickFormatter={convertEpochTime}
                 stroke="rgba(255,255,255,0.5)"
               />
               <YAxis domain={[0, 5]} stroke="rgba(255,255,255,0.5)" />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Legend />
-              {dimensions.map((dimension) => (
+              {dynamicDimensions.map((dimension) => (
                 <Line
                   key={dimension}
                   type="monotone"
@@ -155,4 +157,4 @@ export function TemporalPerformanceChart() {
       </CardContent>
     </Card>
   );
-}
+};

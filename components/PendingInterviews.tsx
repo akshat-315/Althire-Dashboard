@@ -11,34 +11,6 @@ import {
 } from "@/types/interviewTypes";
 import { useEffect, useState } from "react";
 
-interface PendingInterview {
-  id: string;
-  expiryTime: string;
-  link: string;
-  interviewer: string;
-}
-
-const pendingInterviews: PendingInterview[] = [
-  {
-    id: "INT-001",
-    expiryTime: "2023-06-15T14:00:00Z",
-    link: "https://meet.althire.ai/int-001",
-    interviewer: "Alice Johnson",
-  },
-  {
-    id: "INT-002",
-    expiryTime: "2023-06-16T10:30:00Z",
-    link: "https://meet.althire.ai/int-002",
-    interviewer: "Bob Smith",
-  },
-  {
-    id: "INT-003",
-    expiryTime: "2023-06-17T16:45:00Z",
-    link: "https://meet.althire.ai/int-003",
-    interviewer: "Carol Davis",
-  },
-];
-
 export const PendingInterviews: React.FC<InterviewStatsProp> = ({
   interviewList,
 }) => {
