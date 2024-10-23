@@ -206,6 +206,13 @@ export const DimensionalScores: React.FC<InterviewStatsProp> = ({
     }
   }, [interviewList]);
 
+  const formatDimensionsForRadar = (dimensions: { [key: string]: number }) => {
+    return Object.keys(dimensions).map((dimensionKey) => ({
+      dimension: dimensionKey,
+      score: dimensions[dimensionKey],
+    }));
+  };
+
   console.log("Dimensional data: ", dimensionalData);
 
   const paginatedInterviews = dimensionalData.slice(
@@ -227,7 +234,9 @@ export const DimensionalScores: React.FC<InterviewStatsProp> = ({
               <h3 className="text-lg font-semibold mb-2">{interview.id}</h3>
               <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={formatData(dimensionalData)}>
+                  <RadarChart
+                    data={formatDimensionsForRadar(interview.dimensions)}
+                  >
                     <PolarGrid stroke="rgba(255,255,255,0.3)" />
                     <PolarAngleAxis
                       dataKey="dimension"
@@ -249,24 +258,26 @@ export const DimensionalScores: React.FC<InterviewStatsProp> = ({
                 </ResponsiveContainer>
               </div>
               <div className="flex flex-wrap justify-center gap-2 mt-4">
-                {dimensionalData.map(
-                  (dimScoreObj: DimensionalScoreInterface, i) =>
-                    Object.keys(dimScoreObj.dimensions).map(
-                      (dimensionKey, j) => (
-                        <Badge
-                          key={`${dimScoreObj.id}-${dimensionKey}`}
-                          variant="outline"
-                          className="text-xs"
-                          style={{
-                            borderColor: colorScheme[j % colorScheme.length],
-                            color: colorScheme[j % colorScheme.length],
-                          }}
-                        >
-                          {dimensionKey}: {dimScoreObj.dimensions[dimensionKey]}
-                        </Badge>
-                      )
-                    )
-                )}
+                {Object.keys(interview.dimensions).map((dimensionKey, j) => {
+                  console.log("Dimension Key:", dimensionKey); // Log the dimension key
+                  console.log(
+                    "Dimension Score:",
+                    interview.dimensions[dimensionKey]
+                  ); // Log the dimension score
+                  return (
+                    <Badge
+                      key={`${interview.id}-${dimensionKey}`}
+                      variant="outline"
+                      className="text-xs"
+                      style={{
+                        borderColor: colorScheme[j % colorScheme.length],
+                        color: colorScheme[j % colorScheme.length],
+                      }}
+                    >
+                      {dimensionKey}:{interview.dimensions[dimensionKey]}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
           ))}
